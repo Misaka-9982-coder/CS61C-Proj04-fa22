@@ -336,7 +336,6 @@ int mul_matrix(matrix *result, matrix *mat1, matrix *mat2) {
     int row1 = mat1->rows;
     int col1 = mat1->cols;
     int col2 = mat2->cols;
-    fill_matrix(result, 0);
 
     #pragma omp parallel
     {
@@ -403,6 +402,7 @@ int pow_matrix(matrix *result, matrix *mat, int pow) {
             tmp_mat->rows = row;
             tmp_mat->cols = col;
 
+            fill_matrix(result, 0);
             mul_matrix(result, mat, tmp_mat);
 
             for(int i = 0; i < row * col; i ++ ) {
