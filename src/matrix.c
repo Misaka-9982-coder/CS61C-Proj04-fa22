@@ -305,46 +305,27 @@ int pow_matrix(matrix *result, matrix *mat, int pow) {
         }
 
         for(int power = 1; power < pow; power ++ ) {
-            // printf("\n power = %d\n", power);
             double* tmp = malloc(sizeof(double) * (size_t)(row * col));
+
             for(int i = 0; i < row * col; i ++ ) {
                 tmp[i] = data[i];
-                data[i] = 0;
             }
 
-            for (int i = 0; i < row; i ++ ) {
-                for (int j = 0; j < col; j ++ ) {
-                    for (int k = 0; k < col; k ++ ) {
-                        // result->data[i * col2 + k] += mat1->data[i * col1 + j] * mat2->data[j * col2 + k];
-                        data[i * col + k] += tmp[i * col + j] * mat->data[j * col + k];
-                    }
-                }
+            matrix* tmp_mat = malloc(sizeof(matrix));
+            tmp_mat->data = tmp;
+            tmp_mat->rows = row;
+            tmp_mat->cols = col;
+
+            mul_matrix(result, mat, tmp_mat);
+
+            for(int i = 0; i < row * col; i ++ ) {
+                data[i] = result->data[i];
             }
-            
+
+            free(tmp_mat);
             free(tmp);
-
-            // for(int i = 0; i < row; i ++ ) {
-            //     for(int j = 0; j < col; j ++ ) {
-            //         printf("%lf ", data[i * col + j]);
-            //     }
-            //     printf("\n");
-            // }
-
-
-            // printf("\n");
         }
-
-        for(int i = 0; i < row * col; i ++ ) {
-            result->data[i] = data[i];
-        }
-
-        // for(int i = 0; i < row; i ++ ) {
-        //     for(int j = 0; j < col; j ++ ) {
-        //         printf("%lf ", result->data[i * col + j]);
-        //     }
-        //     printf("\n");
-        // }
-
+        
         free(data);
     }
     return 0;
