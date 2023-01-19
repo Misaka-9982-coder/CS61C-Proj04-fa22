@@ -129,7 +129,6 @@ void deallocate_matrix(matrix *mat) {
     }
 
     if(mat->ref_cnt == 0) {
-        free(mat->data);
         free(mat);
     } else {
         deallocate_matrix(mat->parent);
@@ -264,6 +263,18 @@ int sub_matrix(matrix *result, matrix *mat1, matrix *mat2) {
  */
 int mul_matrix(matrix *result, matrix *mat1, matrix *mat2) {
     // Task 1.6 TODO
+    int row1 = mat1->rows;
+    int col1 = mat1->cols;
+    int col2 = mat2->cols;
+    fill_matrix(result, 0);
+    for (int i = 0; i < row1; i ++ ) {
+        for (int j = 0; j < col1; j ++ ) {
+            for (int k = 0; k < col2; k ++ ) {
+                result->data[i * col2 + k] += mat1->data[i * col1 + j] * mat2->data[j * col2 + k];
+            }
+        }
+    }
+    return 0;
 }
 
 /*
@@ -275,4 +286,66 @@ int mul_matrix(matrix *result, matrix *mat1, matrix *mat2) {
  */
 int pow_matrix(matrix *result, matrix *mat, int pow) {
     // Task 1.6 TODO
+    int row = mat->rows;
+    int col = mat->cols;
+    if(pow == 0) {
+        for(int i = 0; i < row; i ++ ) {
+            for(int j = 0; j < col; j ++ ) {
+                if(i != j) {
+                    result->data[i * col + j] = 0;
+                } else {
+                    result->data[i * col + j] = 1;
+                }
+            }
+        }
+    } else {
+        double* data = malloc(sizeof(double) * (size_t)(row * col));
+        for(int i = 0; i < row * col; i ++ ) {
+            data[i] = mat->data[i];
+        }
+
+        for(int power = 1; power < pow; power ++ ) {
+            // printf("\n power = %d\n", power);
+            double* tmp = malloc(sizeof(double) * (size_t)(row * col));
+            for(int i = 0; i < row * col; i ++ ) {
+                tmp[i] = data[i];
+                data[i] = 0;
+            }
+
+            for (int i = 0; i < row; i ++ ) {
+                for (int j = 0; j < col; j ++ ) {
+                    for (int k = 0; k < col; k ++ ) {
+                        // result->data[i * col2 + k] += mat1->data[i * col1 + j] * mat2->data[j * col2 + k];
+                        data[i * col + k] += tmp[i * col + j] * mat->data[j * col + k];
+                    }
+                }
+            }
+            
+            free(tmp);
+
+            // for(int i = 0; i < row; i ++ ) {
+            //     for(int j = 0; j < col; j ++ ) {
+            //         printf("%lf ", data[i * col + j]);
+            //     }
+            //     printf("\n");
+            // }
+
+
+            // printf("\n");
+        }
+
+        for(int i = 0; i < row * col; i ++ ) {
+            result->data[i] = data[i];
+        }
+
+        // for(int i = 0; i < row; i ++ ) {
+        //     for(int j = 0; j < col; j ++ ) {
+        //         printf("%lf ", result->data[i * col + j]);
+        //     }
+        //     printf("\n");
+        // }
+
+        free(data);
+    }
+    return 0;
 }
