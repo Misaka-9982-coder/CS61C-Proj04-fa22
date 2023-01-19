@@ -375,12 +375,16 @@ int pow_matrix(matrix *result, matrix *mat, int pow) {
     int row = mat->rows;
     int col = mat->cols;
     if(pow == 0) {
-        for(int i = 0; i < row; i ++ ) {
-            for(int j = 0; j < col; j ++ ) {
-                if(i != j) {
-                    result->data[i * col + j] = 0;
-                } else {
-                    result->data[i * col + j] = 1;
+        #pragma omp parallel
+        {
+            #pragma omp parallel for
+            for(int i = 0; i < row; i ++ ) {
+                for(int j = 0; j < col; j ++ ) {
+                    if(i != j) {
+                        result->data[i * col + j] = 0;
+                    } else {
+                        result->data[i * col + j] = 1;
+                    }
                 }
             }
         }
@@ -393,8 +397,12 @@ int pow_matrix(matrix *result, matrix *mat, int pow) {
         for(int power = 1; power < pow; power ++ ) {
             double* tmp = malloc(sizeof(double) * (size_t)(row * col));
 
-            for(int i = 0; i < row * col; i ++ ) {
-                tmp[i] = data[i];
+            #pragma omp parallel
+            {
+                #pragma omp parallel for
+                for(int i = 0; i < row * col; i ++ ) {
+                    tmp[i] = data[i];
+                }
             }
 
             matrix* tmp_mat = malloc(sizeof(matrix));
@@ -405,8 +413,12 @@ int pow_matrix(matrix *result, matrix *mat, int pow) {
             fill_matrix(result, 0);
             mul_matrix(result, mat, tmp_mat);
 
-            for(int i = 0; i < row * col; i ++ ) {
-                data[i] = result->data[i];
+            #pragma omp parallel
+            {
+                #pragma omp parallel for
+                for(int i = 0; i < row * col; i ++ ) {
+                    data[i] = result->data[i];
+                }
             }
 
             free(tmp_mat);
