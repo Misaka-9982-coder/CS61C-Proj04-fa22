@@ -413,14 +413,14 @@ int pow_matrix(matrix *result, matrix *mat, int pow) {
             free(tmp);
         }
 
-        for(int i = 0; i < row; i ++ ) {
-            for(int j = 0; j < col; j ++ ) {
-                printf("%lf ", result->data[i * col + j]);
-            }
-            printf("\n");
-        }
+        // for(int i = 0; i < row; i ++ ) {
+        //     for(int j = 0; j < col; j ++ ) {
+        //         printf("%lf ", result->data[i * col + j]);
+        //     }
+        //     printf("\n");
+        // }
 
-        printf("\n");
+        // printf("\n");
 
         free(data);
     }
