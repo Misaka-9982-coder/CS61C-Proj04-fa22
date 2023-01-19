@@ -165,6 +165,50 @@ void neg_test(void) {
   deallocate_matrix(mat);
 } 
 */
+void sub_test(void) {
+  matrix *result = NULL;
+  matrix *mat1 = NULL;
+  matrix *mat2 = NULL;
+  CU_ASSERT_EQUAL(allocate_matrix(&result, 2, 2), 0);
+  CU_ASSERT_EQUAL(allocate_matrix(&mat1, 2, 2), 0);
+  CU_ASSERT_EQUAL(allocate_matrix(&mat2, 2, 2), 0);
+  for (int i = 0; i < 2; i++) {
+    for (int j = 0; j < 2; j++) {
+      set(mat1, i, j, i * 2 + j);
+      set(mat2, i, j, (i * 2 + j) * 3);
+    }
+  }
+  sub_matrix(result, mat1, mat2);
+  for (int i = 0; i < 2; i++) {
+    for (int j = 0; j < 2; j++) {
+      CU_ASSERT_EQUAL(get(result, i, j), (-2) * (i * 2 + j));
+    }
+  }
+  deallocate_matrix(result);
+  deallocate_matrix(mat1);
+  deallocate_matrix(mat2);
+}
+
+
+void neg_test(void) {
+  matrix *result = NULL;
+  matrix *mat = NULL;
+  CU_ASSERT_EQUAL(allocate_matrix(&result, 2, 2), 0);
+  CU_ASSERT_EQUAL(allocate_matrix(&mat, 2, 2), 0);
+  for (int i = 0; i < 2; i++) {
+    for (int j = 0; j < 2; j++) {
+      set(mat, i, j, i * 2 + j);
+    }
+  }
+  neg_matrix(result, mat);
+  for (int i = 0; i < 2; i++) {
+    for (int j = 0; j < 2; j++) {
+      CU_ASSERT_EQUAL(get(result, i, j), -(i * 2 + j));
+    }
+  }
+  deallocate_matrix(result);
+  deallocate_matrix(mat);
+} 
 
 void abs_test(void) {
   matrix *result = NULL;
@@ -296,6 +340,8 @@ int main (void)
         (CU_add_test(pSuite, "sub_test", sub_test) == NULL) ||
         (CU_add_test(pSuite, "neg_test", neg_test) == NULL) ||
         */
+        (CU_add_test(pSuite, "sub_test", sub_test) == NULL) ||
+        (CU_add_test(pSuite, "neg_test", neg_test) == NULL) ||
         (CU_add_test(pSuite, "mul_square_test", mul_square_test) == NULL) ||
         (CU_add_test(pSuite, "mul_non_square_test", mul_non_square_test) == NULL) ||
         (CU_add_test(pSuite, "abs_test", abs_test) == NULL) ||

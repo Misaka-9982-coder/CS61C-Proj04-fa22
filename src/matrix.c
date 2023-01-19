@@ -182,13 +182,38 @@ void fill_matrix(matrix *mat, double val) {
     int rows = mat->rows;
     int cols = mat->cols;
 
-    for(int i = 0; i < (rows * cols / 4 * 4); i += 4 ) {
-        _mm256_storeu_pd (mat->data + i, _mm256_set1_pd(val));
+    #pragma omp parallel
+    {
+        int num_threads = omp_get_num_threads();
+        int tid = omp_get_thread_num();
+        // int step = ARRAY_SIZE / num_threads;
+        int step = rows * cols / num_threads;
+        int start = tid * step;
+        int end = start + step;
+
+        for(int i = 0; i < (rows * cols / 4 * 4); i += 4 ) {
+            _mm256_storeu_pd (mat->data + i, _mm256_set1_pd(val));
+        }
+        // for(int i = start; i < end / 4 * 4; i += 4 ) {
+        //     _mm256_storeu_pd (mat->data + i, _mm256_set1_pd(val));
+        // }
+
+        for(int i = (rows * cols / 4 * 4); i < rows * cols; i ++ ) {
+            mat->data[i] = val;
+        }
+
+        // for(int i = end / 4 * 4; i < end; i ++ ) {
+        //     mat->data[i] = val;
+        // }
     }
 
-    for(int i = rows * cols / 4 * 4; i < rows * cols; i ++ ) {
-        mat->data[i] = val;
-    }
+    // for(int i = 0; i < rows; i ++ ) {
+    //     for(int j = 0; j < cols; j ++ ) {
+    //         printf("%lf ", mat->data[i * cols + j]);
+    //     }
+    //     printf("\n");
+    // }
+    // printf("\n");
 }
 
 /*
@@ -382,6 +407,15 @@ int pow_matrix(matrix *result, matrix *mat, int pow) {
             free(tmp_mat);
             free(tmp);
         }
+
+        for(int i = 0; i < row; i ++ ) {
+            for(int j = 0; j < col; j ++ ) {
+                printf("%lf ", result->data[i * col + j]);
+            }
+            printf("\n");
+        }
+
+        printf("\n");
 
         free(data);
     }
