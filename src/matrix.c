@@ -389,52 +389,91 @@ int pow_matrix(matrix *result, matrix *mat, int pow) {
             }
         }
     } else {
+        // define cur
         double* data = malloc(sizeof(double) * (size_t)(row * col));
         for(int i = 0; i < row * col; i ++ ) {
             data[i] = mat->data[i];
         }
 
-        for(int power = 1; power < pow; power ++ ) {
-            double* tmp = malloc(sizeof(double) * (size_t)(row * col));
+        matrix* cur = malloc(sizeof(matrix));
+        cur->data = data;
+        cur->rows = row;
+        cur->cols = col;
 
-            #pragma omp parallel
-            {
-                #pragma omp parallel for
-                for(int i = 0; i < row * col; i ++ ) {
-                    tmp[i] = data[i];
+        // define res
+        double* data1 = malloc(sizeof(double) * (size_t)(row * col));
+        for(int i = 0; i < row; i ++ ) {
+            for(int j = 0; j < col; j ++ ) {
+                if(i != j) {
+                    data1[i * col + j] = 0;
+                } else {
+                    data1[i * col + j] = 1;
                 }
             }
-
-            matrix* tmp_mat = malloc(sizeof(matrix));
-            tmp_mat->data = tmp;
-            tmp_mat->rows = row;
-            tmp_mat->cols = col;
-
-            fill_matrix(result, 0);
-            mul_matrix(result, mat, tmp_mat);
-
-            #pragma omp parallel
-            {
-                #pragma omp parallel for
-                for(int i = 0; i < row * col; i ++ ) {
-                    data[i] = result->data[i];
-                }
-            }
-
-            free(tmp_mat);
-            free(tmp);
         }
 
-        // for(int i = 0; i < row; i ++ ) {
-        //     for(int j = 0; j < col; j ++ ) {
-        //         printf("%lf ", result->data[i * col + j]);
-        //     }
-        //     printf("\n");
-        // }
+        matrix* res = malloc(sizeof(matrix));
+        res->data = data1;
+        res->rows = row;
+        res->cols = col;
 
-        // printf("\n");
+        // quick matrix power
+        while(pow != 0) {
+            if(pow & 1) {
+                double* data2 = malloc(sizeof(double) * (size_t)(row * col));
+                for(int i = 0; i < row * col; i ++ ) {
+                    data2[i] = res->data[i];
+                }
+
+                matrix* res_copy = malloc(sizeof(matrix));
+                res_copy->data = data2;
+                res_copy->rows = row;
+                res_copy->cols = col;
+                
+                fill_matrix(res, 0);
+                mul_matrix(res, res_copy, cur);
+
+                free(data2);
+                free(res_copy);
+            }
+
+            pow >>= 1;
+
+            double* data3 = malloc(sizeof(double) * (size_t)(row * col));
+            double* data4 = malloc(sizeof(double) * (size_t)(row * col));
+            for(int i = 0; i < row * col; i ++ ) {
+                data3[i] = cur->data[i];
+                data4[i] = cur->data[i];
+            }
+
+            matrix* cur_copy1 = malloc(sizeof(matrix));
+            cur_copy1->data = data3;
+            cur_copy1->rows = row;
+            cur_copy1->cols = col;
+
+            matrix* cur_copy2 = malloc(sizeof(matrix));
+            cur_copy2->data = data4;
+            cur_copy2->rows = row;
+            cur_copy2->cols = col;
+
+            fill_matrix(cur, 0);
+            mul_matrix(cur, cur_copy1, cur_copy2);
+
+            free(data3);
+            free(data4);
+            free(cur_copy1);
+            free(cur_copy2);
+        }
+
+        for(int i = 0; i < row * col; i ++ ) {
+            result->data[i] = res->data[i];
+        }
+
+        free(data1);
+        free(res);
 
         free(data);
+        free(cur);
     }
     return 0;
 }
